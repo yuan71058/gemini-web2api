@@ -119,9 +119,32 @@ SID=你的SID值; HSID=你的HSID值; SSID=你的SSID值; APISID=你的APISID值
   "retry_delay_sec": 2,
   "request_timeout_sec": 180,
   "cookie_file": null,
+  "proxy": null,
   "log_requests": true
 }
 ```
+
+## 代理配置
+
+如果无法直接访问 `gemini.google.com` (连接超时), 需要配置代理:
+
+**方式 1: 命令行参数**
+```bash
+python gemini_web2api.py --proxy http://127.0.0.1:7890
+```
+
+**方式 2: config.json**
+```json
+{"proxy": "http://127.0.0.1:7890"}
+```
+
+**方式 3: 环境变量** (自动检测)
+```bash
+set HTTPS_PROXY=http://127.0.0.1:7890
+python gemini_web2api.py
+```
+
+支持 Clash, V2Ray, Shadowsocks 等任何 HTTP 代理.
 
 ## 系统要求
 

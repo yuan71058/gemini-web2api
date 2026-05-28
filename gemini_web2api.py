@@ -40,6 +40,7 @@ DEFAULT_CONFIG = {
     "default_model": "gemini-3.5-flash",
     "log_requests": True,
     "cookie_file": None,
+    "proxy": None,
 }
 
 CONFIG = dict(DEFAULT_CONFIG)
@@ -163,7 +164,15 @@ def gemini_stream_generate(prompt: str, model_id: int, think_mode: int) -> str:
         try:
             req = urllib.request.Request(url, data=body, headers=headers, method="POST")
             ctx = ssl.create_default_context()
-            resp = urllib.request.urlopen(req, context=ctx, timeout=CONFIG["request_timeout_sec"])
+            proxy = CONFIG.get("proxy")
+            if proxy:
+                opener = urllib.request.build_opener(
+                    urllib.request.ProxyHandler({"http": proxy, "https": proxy}),
+                    urllib.request.HTTPSHandler(context=ctx)
+                )
+                resp = opener.open(req, timeout=CONFIG["request_timeout_sec"])
+            else:
+                resp = urllib.request.urlopen(req, context=ctx, timeout=CONFIG["request_timeout_sec"])
             return resp.read().decode("utf-8", errors="replace")
         except Exception as e:
             last_err = e
@@ -520,6 +529,7 @@ def main():
     parser.add_argument("--port", type=int, default=None)
     parser.add_argument("--config", type=str, default=None)
     parser.add_argument("--cookie-file", type=str, default=None, help="Path to cookie file")
+    parser.add_argument("--proxy", type=str, default=None, help="HTTP proxy, e.g. http://127.0.0.1:7890")
     parser.add_argument("--version", action="version", version=f"gemini-web2api {__version__}")
     args = parser.parse_args()
 
@@ -535,6 +545,8 @@ def main():
         CONFIG["port"] = args.port
     if args.cookie_file:
         CONFIG["cookie_file"] = args.cookie_file
+    if args.proxy:
+        CONFIG["proxy"] = args.proxy
 
     class ThreadedServer(ThreadingMixIn, HTTPServer):
         daemon_threads = True
@@ -547,6 +559,7 @@ def main():
     print(f"  Base URL:  http://localhost:{port}/v1")
     print(f"  Models:    {', '.join(MODELS.keys())}")
     print(f"  Cookie:    {'yes (' + CONFIG['cookie_file'] + ')' if CONFIG.get('cookie_file') else 'none (anonymous)'}")
+    print(f"  Proxy:     {CONFIG.get('proxy') or 'none (uses system env HTTP_PROXY/HTTPS_PROXY)'}")
     print(f"  Retry:     {CONFIG['retry_attempts']}x / {CONFIG['retry_delay_sec']}s")
     print()
     try:

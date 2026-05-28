@@ -6,5 +6,6 @@
   "request_timeout_sec": 180,
   "default_model": "gemini-3.5-flash",
   "cookie_file": null,
+  "proxy": null,
   "log_requests": true
 }

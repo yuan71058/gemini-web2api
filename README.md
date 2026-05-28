@@ -119,9 +119,32 @@ Create `config.json` in the same directory:
   "retry_delay_sec": 2,
   "request_timeout_sec": 180,
   "cookie_file": null,
+  "proxy": null,
   "log_requests": true
 }
 ```
+
+## Proxy
+
+If you cannot access `gemini.google.com` directly (connection timeout), configure a proxy:
+
+**Method 1: CLI argument**
+```bash
+python gemini_web2api.py --proxy http://127.0.0.1:7890
+```
+
+**Method 2: config.json**
+```json
+{"proxy": "http://127.0.0.1:7890"}
+```
+
+**Method 3: Environment variable** (auto-detected)
+```bash
+export HTTPS_PROXY=http://127.0.0.1:7890
+python gemini_web2api.py
+```
+
+Works with Clash, V2Ray, Shadowsocks, or any HTTP proxy.
 
 ## Tool Calling
 
